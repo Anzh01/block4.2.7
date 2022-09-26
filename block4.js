@@ -25,20 +25,16 @@ function pickRepos(item) {
   pickedRepos.innerHTML += `<div class="picked">Name: ${name}<br>Owner: ${owner}<br>Stars: ${stars}<button class="button_close"></button></div>`;
 }
 
-async function getOptions() {
-  let repos = new URL("https://api.github.com/search/repositories");
-  let repositoriesPart = searchInput.value;
-  if (repositoriesPart == "") {
-    clearSearch();
-    return;
-  }
-  repos.searchParams.append("q", repositoriesPart);
+async function getOptions(repositoriesPart) {
+  repositoriesPart = searchInput.value;
+  let repos = `https://api.github.com/search/repositories?q=${repositoriesPart}`;
+
   try {
     let response = await fetch(repos);
     if (response.ok) {
       let repositories = await response.json();
       showOptions(repositories);
-    } else return null;
+    }
   } catch (error) {
     return null;
   }
@@ -60,11 +56,9 @@ dropdown.addEventListener("click", (evt) => {
 
 pickedRepos.addEventListener("click", (evt) => {
   let target = evt.target;
-  if (!target.classList.contains("button_close")) {
-    return;
+  if (target.classList.contains("button_close")) {
+    target.parentElement.remove();
   }
-
-  target.parentElement.remove();
 });
 
 function debounce(fn, timeout) {
@@ -77,5 +71,5 @@ function debounce(fn, timeout) {
     });
   };
 }
-const getPredictionsDebounce = debounce(getOptions, 500);
+const getPredictionsDebounce = debounce(getOptions, 300);
 searchInput.addEventListener("input", getPredictionsDebounce);
